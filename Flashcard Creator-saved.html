@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Flashcards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="fatch_data.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #cde7ec; /* background color */
+      }
+
+      /* 3D Flip Animation Setup */
+      .flashcard-wrapper {
+        perspective: 1500px;
+      }
+
+      .flashcard-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.7s;
+        transform-style: preserve-3d;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+
+      .flashcard-wrapper.is-flipped .flashcard-inner {
+        transform: rotateY(180deg);
+      }
+
+      .flashcard-front,
+      .flashcard-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        text-align: center;
+        border-radius: 1rem; /* 16px */
+      }
+
+      .flashcard-back {
+        transform: rotateY(180deg);
+      }
+
+      /* Custom Theme Colors */
+      .bg-primary-dark {
+        background-color: #00424a;
+      }
+      .text-primary-dark {
+        color: #00424a;
+      }
+      .hover\:bg-secondary-dark:hover {
+        background-color: #273f43;
+      }
+      .bg-neutral-light {
+        background-color: #f8fafa;
+      }
+      .text-neutral-dark {
+        color: #393c3d;
+      }
+      .bg-secondary-light {
+        background-color: #dbf6fa;
+      }
+      .text-secondary-dark {
+        color: #273f43;
+      }
+      .hover\:bg-tertiary-light:hover {
+        background-color: #bac6ea;
+      }
+      .fill-marked {
+        fill: #f59e0b;
+      } /* Amber-500 from Tailwind for a nice star color */
+      .stroke-marked {
+        stroke: #f59e0b;
+      }
+      .fill-unmarked {
+        fill: none;
+      }
+      .stroke-unmarked {
+        stroke: #273f43;
+      }
+
+      /* Animation for card switching */
+      @keyframes slide-in-right {
+        0% {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        100% {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      @keyframes slide-in-left {
+        0% {
+          transform: translateX(-100%);
+          opacity: 0;
+        }
+        100% {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      .animate-slide-in-right {
+        animation: slide-in-right 0.4s ease-out forwards;
+      }
+      .animate-slide-in-left {
+        animation: slide-in-left 0.4s ease-out forwards;
+      }
+    </style>
+  </head>
+  <body class="antialiased flex items-center justify-center min-h-screen p-4">
+    <main class="w-full max-w-sm mx-auto flex flex-col">
+      <div class="flashcard-wrapper w-full h-72 sm:h-80 mb-4">
+        <div id="flashcard-inner" class="flashcard-inner">
+          <!-- Front of the card -->
+          <div class="flashcard-front bg-neutral-light">
+            <p
+              class="text-xs uppercase font-semibold text-secondary-dark/60 mb-auto pt-2"
+            >
+              Question
+            </p>
+            <p
+              id="question-text"
+              class="text-2xl md:text-3xl font-medium text-neutral-dark -mt-8"
+            ></p>
+          </div>
+          <!-- Back of the card -->
+          <div class="flashcard-back bg-secondary-light">
+            <p
+              class="text-xs uppercase font-semibold text-primary-dark/60 mb-auto pt-2"
+            >
+              Answer
+            </p>
+            <p
+              id="answer-text"
+              class="text-2xl md:text-3xl font-bold text-primary-dark -mt-8"
+            ></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center w-full mb-6 px-2">
+        <p
+          id="progress-text"
+          class="text-sm font-medium text-secondary-dark"
+        ></p>
+        <button
+          id="mark-btn"
+          title="Mark for review"
+          class="p-2 rounded-full transition-colors duration-200 hover:bg-tertiary-light/50"
+        >
+          <svg
+            id="star-icon"
+            class="w-6 h-6"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M12 17.75l-6.172 3.245 1.179-6.873-4.993-4.867 6.9-1.002L12 2l3.086 6.253 6.9 1.002-4.993 4.867 1.179 6.873z"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="flex justify-between items-center gap-4">
+        <button
+          id="prev-btn"
+          class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary-dark text-neutral-light font-semibold shadow-lg hover:bg-secondary-dark transition-all duration-200 transform hover:scale-105"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <span>Prev</span>
+        </button>
+        <button
+          id="next-btn"
+          class="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary-dark text-neutral-light font-semibold shadow-lg hover:bg-secondary-dark transition-all duration-200 transform hover:scale-105"
+        >
+          <span>Next</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </button>
+      </div>
+    </main>
+  </body>
+</html>
