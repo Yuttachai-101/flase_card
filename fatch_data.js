@@ -1,3 +1,5 @@
+import { URL_SHEET } from "./config.js";
+
 /**
  * ฟังก์ชันสำหรับดึงข้อมูล Google Sheet ที่เผยแพร่เป็น CSV
  * และแปลงเป็น JSON (Array of Objects)
@@ -82,9 +84,11 @@ function csvToJSON(csvText) {
 
   return result;
 }
+if (URL_SHEET == "") {
+  alert("กรุณากําหนด URL ของ Google Sheet");
+}
+const mySheetUrl = URL_SHEET;
 
-const mySheetUrl =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9fjAuTBUmQvenJJoDEqXz6TqCF_WbmzZueFL9kfTTRhoFSLqrZ9LHziJPNCSw-K8gCb8DjNdtSots/pub?gid=0&single=true&output=csv";
 console.log("กำลังโหลด...");
 
 // เราสามารถ await ที่ "ระดับบนสุด" ได้เลย!
