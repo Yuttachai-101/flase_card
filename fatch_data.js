@@ -18,36 +18,6 @@ async function fetchGoogleSheetAsJSON(sheetUrl) {
     // แปลง CSV เป็น JSON
     const data = csvToJSON(csvText);
 
-    // console.log("ข้อมูลที่แปลงเป็น JSON แล้ว:", data);
-
-    //   const flashcardData = [
-    //     {
-    //       question: "What is the capital of Japan?",
-    //       answer: "Tokyo",
-    //       marked: false,
-    //     },
-    //     {
-    //       question: "What is the chemical symbol for water?",
-    //       answer: "H₂O",
-    //       marked: false,
-    //     },
-    //     {
-    //       question: "Who wrote 'To Kill a Mockingbird'?",
-    //       answer: "Harper Lee",
-    //       marked: true,
-    //     },
-    //     {
-    //       question: "What planet is known as the Red Planet?",
-    //       answer: "Mars",
-    //       marked: false,
-    //     },
-    //     {
-    //       question: "What is the provided text?",
-    //       answer: "knowlage",
-    //       marked: false,
-    //     },
-    //   ];
-
     return data;
   } catch (error) {
     console.error("Error fetching Google Sheet:", error);
@@ -76,7 +46,16 @@ function csvToJSON(csvText) {
     // จับคู่ข้อมูลในแถวกับ Header
     for (let j = 0; j < headers.length; j++) {
       // .trim() เพื่อลบช่องว่างหรืออักขระพิเศษที่อาจติดมา
-      obj[headers[j].trim()] = currentLine[j].trim();
+      let header = "empty";
+      let currentLn = "";
+      if (headers[j] != null) {
+        header = headers[j].trim();
+      }
+      if (currentLine[j] != null) {
+        currentLn = currentLine[j].trim();
+      }
+
+      obj[header] = currentLn;
     }
 
     result.push(obj);
@@ -92,9 +71,18 @@ const mySheetUrl = URL_SHEET;
 console.log("กำลังโหลด...");
 
 // เราสามารถ await ที่ "ระดับบนสุด" ได้เลย!
-const flashcardData = await fetchGoogleSheetAsJSON(mySheetUrl);
+let flashcardData = await fetchGoogleSheetAsJSON(mySheetUrl);
 
 console.log("โหลดเสร็จแล้ว:", flashcardData);
+if (!flashcardData) {
+  flashcardData = [
+    {
+      question: "ไม่สามารถโหลดข้อมูลได้",
+      answer: "T.T",
+      marked: false,
+    },
+  ];
+}
 
 let currentIndex = 0;
 let isAnimating = false;
