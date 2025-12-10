@@ -14,39 +14,9 @@ async function fetchGoogleSheetAsJSON(sheetUrl) {
 
     // ดึงข้อมูล Text (CSV)
     const csvText = await response.text();
-
+    console.log(csvText);
     // แปลง CSV เป็น JSON
     const data = csvToJSON(csvText);
-
-    // console.log("ข้อมูลที่แปลงเป็น JSON แล้ว:", data);
-
-    //   const flashcardData = [
-    //     {
-    //       question: "What is the capital of Japan?",
-    //       answer: "Tokyo",
-    //       marked: false,
-    //     },
-    //     {
-    //       question: "What is the chemical symbol for water?",
-    //       answer: "H₂O",
-    //       marked: false,
-    //     },
-    //     {
-    //       question: "Who wrote 'To Kill a Mockingbird'?",
-    //       answer: "Harper Lee",
-    //       marked: true,
-    //     },
-    //     {
-    //       question: "What planet is known as the Red Planet?",
-    //       answer: "Mars",
-    //       marked: false,
-    //     },
-    //     {
-    //       question: "What is the provided text?",
-    //       answer: "knowlage",
-    //       marked: false,
-    //     },
-    //   ];
 
     return data;
   } catch (error) {
@@ -92,9 +62,18 @@ const mySheetUrl = URL_SHEET;
 console.log("กำลังโหลด...");
 
 // เราสามารถ await ที่ "ระดับบนสุด" ได้เลย!
-const flashcardData = await fetchGoogleSheetAsJSON(mySheetUrl);
+let flashcardData = await fetchGoogleSheetAsJSON(mySheetUrl);
 
 console.log("โหลดเสร็จแล้ว:", flashcardData);
+if (!flashcardData) {
+  flashcardData = [
+    {
+      question: "ไม่สามารถโหลดข้อมูลได้",
+      answer: "T.T",
+      marked: false,
+    },
+  ];
+}
 
 let currentIndex = 0;
 let isAnimating = false;
