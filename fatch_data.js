@@ -14,7 +14,7 @@ async function fetchGoogleSheetAsJSON(sheetUrl) {
 
     // ดึงข้อมูล Text (CSV)
     const csvText = await response.text();
-    console.log(csvText);
+
     // แปลง CSV เป็น JSON
     const data = csvToJSON(csvText);
 
@@ -46,7 +46,16 @@ function csvToJSON(csvText) {
     // จับคู่ข้อมูลในแถวกับ Header
     for (let j = 0; j < headers.length; j++) {
       // .trim() เพื่อลบช่องว่างหรืออักขระพิเศษที่อาจติดมา
-      obj[headers[j].trim()] = currentLine[j].trim();
+      let header = "empty";
+      let currentLn = "";
+      if (headers[j] != null) {
+        header = headers[j].trim();
+      }
+      if (currentLine[j] != null) {
+        currentLn = currentLine[j].trim();
+      }
+
+      obj[header] = currentLn;
     }
 
     result.push(obj);
